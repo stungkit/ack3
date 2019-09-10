@@ -665,8 +665,6 @@ sub print_matches_in_file {
     my $nmatches  = 0;
     my $filename  = $file->name;
 
-    my $has_printed_for_this_file;
-
     my $fh = $file->open;
     if ( !$fh ) {
         if ( $App::Ack::report_bad_filenames ) {
@@ -687,6 +685,7 @@ sub print_matches_in_file {
         $after_context_pending = 0;
 
         my $in_range = range_setup();
+        my $has_printed_for_this_file;
 
         while ( <$fh> ) {
             chomp;
@@ -747,6 +746,7 @@ sub print_matches_in_file {
         local $_ = undef;
 
         my $in_range = range_setup();
+        my $has_printed_for_this_file;
 
         while ( <$fh> ) {
             chomp;
@@ -767,7 +767,6 @@ sub print_matches_in_file {
                     }
                 }
                 print_line_with_context( $filename, $_, $. );
-                $has_printed_for_this_file = 1;
                 $nmatches++;
                 $max_count--;
             }
@@ -776,8 +775,8 @@ sub print_matches_in_file {
                     App::Ack::print_blank_line();
                 }
                 print_line_with_options( $filename, $_, $., ':', 1 );
-                $has_printed_for_this_file = 1;
             }
+            $has_printed_for_this_file = 1;
 
             $in_range = 0 if ( $using_ranges && $in_range && $opt_range_end && /$opt_range_end/o );
 
@@ -789,6 +788,7 @@ sub print_matches_in_file {
 
         $match_colno = undef;
         my $in_range = range_setup();
+        my $has_printed_for_this_file;
 
         while ( <$fh> ) {
             chomp;
@@ -822,6 +822,7 @@ sub print_matches_in_file {
 
         my $last_match_lineno;
         my $in_range = range_setup();
+        my $has_printed_for_this_file;
 
         while ( <$fh> ) {
             chomp;
