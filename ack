@@ -53,9 +53,6 @@ our $opt_show_types;
 our $opt_underline;
 our $opt_v;
 
-# Flag if we need any context tracking.
-our $is_tracking_context;
-
 # The regex that we search for in each file.
 our $search_re;
 
@@ -624,19 +621,12 @@ sub file_loop_normal {
     @before_context_buf = (undef) x $n_before_ctx_lines;
     $before_context_pos = 0;
 
-    $is_tracking_context = $n_before_ctx_lines || $n_after_ctx_lines;
+    my $is_tracking_context = $n_before_ctx_lines || $n_after_ctx_lines;
 
     $is_first_match = 1;
 
     my $nmatches = 0;
     while ( defined( my $file = $files->next ) ) {
-        if ($is_tracking_context) {
-            $printed_lineno = 0;
-            $after_context_pending = 0;
-            if ( $opt_heading ) {
-                $is_first_match = 1;
-            }
-        }
         my $needs_line_scan = 1;
         if ( !$opt_passthru && !$opt_v ) {
             $stats{prescans}++;
@@ -649,7 +639,7 @@ sub file_loop_normal {
         }
         if ( $needs_line_scan ) {
             $stats{linescans}++;
-            $nmatches += print_matches_in_file( $file );
+            $nmatches += print_matches_in_file( $file, $is_tracking_context );
         }
         last if $opt_1 && $nmatches;
     }
@@ -660,9 +650,11 @@ sub file_loop_normal {
 
 sub print_matches_in_file {
     my $file = shift;
+    my $is_tracking_context = shift;
 
     my $max_count = $opt_m || -1;   # Go negative for no limit so it can never reduce to 0.
     my $nmatches  = 0;
+
     my $filename  = $file->name;
 
     my $fh = $file->open;
@@ -681,6 +673,12 @@ sub print_matches_in_file {
     # Check for context before the main loop, so we don't pay for it if we don't need it.
     if ( $is_tracking_context ) {
         local $_ = undef;
+
+        $printed_lineno = 0;
+        $after_context_pending = 0;
+        if ( $opt_heading ) {
+            $is_first_match = 1;
+        }
 
         $after_context_pending = 0;
 
