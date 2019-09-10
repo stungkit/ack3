@@ -665,7 +665,7 @@ sub print_matches_in_file {
     my $nmatches  = 0;
     my $filename  = $file->name;
 
-    my $has_printed_for_this_file = 0;
+    my $has_printed_for_this_file;
 
     my $fh = $file->open;
     if ( !$fh ) {
